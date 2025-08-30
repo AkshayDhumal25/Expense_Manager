@@ -1,0 +1,33 @@
+﻿@model Transaction
+
+<h2>Edit Transaction</h2>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label>Amount</label>
+        <input asp-for="Amount" class="form-control" type="number" step="0.01" />
+    </div>
+
+    <div class="form-group">
+        <label>Type</label>
+        <select asp-for="Type" class="form-control">
+            <option value="Credit">Credit</option>
+            <option value="Debit">Debit</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        <input asp-for="Description" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label>Date</label>
+        <input asp-for="Date" class="form-control" type="date" />
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Update</button>
+    <a asp-action="Index" class="btn btn-secondary mt-3">Cancel</a>
+</form>
