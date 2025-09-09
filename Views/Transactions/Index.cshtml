@@ -1,23 +1,41 @@
 ﻿@model IEnumerable<Transaction>
 
-<h2 class="text-2xl font-bold mb-4">Transactions</h2>
-<a asp-action="DownloadPdf" asp-route-search="@Context.Request.Query["search"]" asp-route-typeFilter="@Context.Request.Query["typeFilter"]" class="btn btn-success mt-3">
-    Download PDF
-</a>
+@{
+    ViewData["Title"] = "Transactions";
+}
 
-<h3 class="mb-3">Balance: <span class="font-semibold">@ViewBag.Balance</span></h3>
-<!-- Index.cshtml -->
-<form method="get">
-    <input type="text" name="search" placeholder="Search description..." />
-    <select name="typeFilter">
+<h2 class="text-2xl font-bold mb-4">Transactions</h2>
+
+<!-- Download PDF button -->
+<a asp-action="DownloadPdf"
+   asp-route-search="@Context.Request.Query["search"]"
+   asp-route-typeFilter="@Context.Request.Query["typeFilter"]"
+   class="btn btn-success mb-3">
+    📄 Download PDF
+</a>
+<!-- Add New -->
+<a asp-action="Create" class="btn btn-success mt-4">➕ Add New Transaction</a>
+
+<a asp-action="Graph" class="btn btn-info mt-3">View Graphs</a>
+
+
+<!-- Balance -->
+<h3 class="mb-3">Balance: <span class="font-semibold">₹@ViewBag.Balance</span></h3>
+
+<!-- Search and Filter -->
+<form method="get" class="mb-3 d-flex gap-2">
+    <input type="text" name="search" placeholder="Search description..." value="@Context.Request.Query["search"]" class="form-control" />
+    <select name="typeFilter" class="form-select">
         <option value="">All</option>
-        <option value="Income">Income</option>
-        <option value="Expense">Expense</option>
+        <option value="Income" selected="@(Context.Request.Query["typeFilter"] == "Income")">Income</option>
+        <option value="Expense" selected="@(Context.Request.Query["typeFilter"] == "Expense")">Expense</option>
     </select>
-    <button type="submit">Filter</button>
+    <button type="submit" class="btn btn-primary">Filter</button>
 </form>
+
+<!-- Transactions Table -->
 <table class="table table-bordered table-striped w-100">
-    <thead>
+    <thead class="table-dark">
         <tr>
             <th>Date</th>
             <th>Type</th>
@@ -27,21 +45,29 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var t in Model)
+        @if (Model != null && Model.Any())
+        {
+            foreach (var t in Model)
+            {
+                <tr>
+                    <td>@t.Date.ToShortDateString()</td>
+                    <td>@t.Type</td>
+                    <td>₹@t.Amount</td>
+                    <td>@t.Description</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-warning">✏️ Edit</a>
+                        <a asp-action="Delete" asp-route-id="@t.Id" class="btn btn-sm btn-danger">🗑️ Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@t.Date.ToShortDateString()</td>
-                <td>@t.Type</td>
-                <td>@t.Amount</td>
-                <td>@t.Description</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@t.Id" class="btn btn-sm btn-warning">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@t.Id" class="btn btn-sm btn-danger">Delete</a>
-                </td>
+                <td colspan="5" class="text-center">No transactions found</td>
             </tr>
         }
     </tbody>
 </table>
 
 
-<a asp-action="Create" class="btn btn-primary mt-3">Add New Transaction</a>

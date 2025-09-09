@@ -1,0 +1,110 @@
+﻿@{
+    ViewData["Title"] = "Expense Graphs";
+
+    var last6Months = ViewBag.Last6Months as IEnumerable<dynamic> ?? new List<dynamic>();
+    var categories = ViewBag.CategoryBreakdown as IEnumerable<dynamic> ?? new List<dynamic>();
+
+    var months = new List<string>();
+    var incomes = new List<decimal>();
+    var expenses = new List<decimal>();
+
+    foreach (var item in last6Months)
+    {
+        // Month handling
+        string monthLabel = "";
+        if (item.Month != null)
+        {
+            DateTime dt;
+            if (DateTime.TryParse(item.Month.ToString(), out dt))
+                monthLabel = dt.ToString("MMM yyyy");
+            else
+                monthLabel = item.Month.ToString();
+        }
+        months.Add(monthLabel);
+
+        // Income & Expense
+        decimal income = 0, expense = 0;
+        if (item.Income != null) decimal.TryParse(item.Income.ToString(), out income);
+        if (item.Expense != null) decimal.TryParse(item.Expense.ToString(), out expense);
+
+        incomes.Add(income);
+        expenses.Add(expense);
+    }
+
+    var categoryNames = new List<string>();
+    var categoryAmounts = new List<decimal>();
+
+    foreach (var cat in categories)
+    {
+        categoryNames.Add(cat.Category != null ? cat.Category.ToString() : "");
+        decimal amt = 0;
+        if (cat.Amount != null) decimal.TryParse(cat.Amount.ToString(), out amt);
+        categoryAmounts.Add(amt);
+    }
+}
+
+<h2 class="text-2xl font-bold mb-4">Expense Insights</h2>
+
+<canvas id="monthlyChart" width="400" height="200"></canvas>
+<canvas id="categoryChart" width="400" height="200" class="mt-5"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    // Monthly Bar Chart
+    const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+    const monthlyChart = new Chart(monthlyCtx, {
+        type: 'bar',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(months)),
+            datasets: [
+                {
+                    label: 'Income',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(incomes)),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                },
+                {
+                    label: 'Expense',
+                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(expenses)),
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Income vs Expense (Last 6 Months)' }
+            },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
+
+    // Category Pie Chart
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categoryNames)),
+            datasets: [{
+                label: 'Expenses',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(categoryAmounts)),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: true, text: 'Expense by Category' }
+            }
+        }
+    });
+</script>

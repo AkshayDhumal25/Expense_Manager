@@ -93,30 +93,56 @@ namespace Expense_Manager.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        //public async Task<IActionResult> Index(string search, string typeFilter)
+        //{
+        //    var transactions = from t in _context.Transactions
+        //                       select t;
+
+
+        //    if (!string.IsNullOrEmpty(search))
+        //    {
+        //        transactions = transactions.Where(t => t.Description.Contains(search));
+        //    }
+
+
+        //    if (!string.IsNullOrEmpty(typeFilter))
+        //    {
+        //        transactions = transactions.Where(t => t.Type == typeFilter);
+        //    }
+
+
+        //    ViewBag.Balance = await transactions.SumAsync(t => t.Type == "Income" ? t.Amount : -t.Amount);
+
+        //    return View(await transactions.ToListAsync());
+        //}
+
         public async Task<IActionResult> Index(string search, string typeFilter)
         {
-            var transactions = from t in _context.Transactions
-                               select t;
+            var transactions = _context.Transactions.AsQueryable();
 
-            
+            // Search filter
             if (!string.IsNullOrEmpty(search))
             {
                 transactions = transactions.Where(t => t.Description.Contains(search));
             }
 
-           
+            // Type filter (Income / Expense)
             if (!string.IsNullOrEmpty(typeFilter))
             {
                 transactions = transactions.Where(t => t.Type == typeFilter);
             }
 
-            
-            ViewBag.Balance = await transactions.SumAsync(t => t.Type == "Income" ? t.Amount : -t.Amount);
+            // Calculate balance
+            ViewBag.Balance = await transactions
+                .SumAsync(t => t.Type == "Income" ? t.Amount : -t.Amount);
 
-            return View(await transactions.ToListAsync());
+            // Return list to view
+            var result = await transactions
+                .OrderByDescending(t => t.Date)
+                .ToListAsync();
+
+            return View(result);
         }
-
-
         public IActionResult DownloadPdf(string search, string typeFilter)
         {
            
@@ -160,10 +186,7 @@ namespace Expense_Manager.Controllers
                             header.Cell().Text("Description").Bold();
                         });
 
-                        
-                        foreach (var t in list)
-                        {
-                            table.Cell().Text(t.Date.ToShortDateString());
+                        ng());
                             table.Cell().Text(t.Type);
                             table.Cell().Text(t.Amount.ToString("C"));
                             table.Cell().Text(t.Description);
@@ -175,6 +198,41 @@ namespace Expense_Manager.Controllers
             var pdfBytes = document.GeneratePdf();
             return File(pdfBytes, "application/pdf", "TransactionsReport.pdf");
         }
+
+        public async Task<IActionResult> Graph()
+        {
+            var transactions = await _context.Transactions.ToListAsync();
+
+            var last6Months = transactions
+                .Where(t => t.Date >= DateTime.Today.AddMonths(-6))
+                .GroupBy(t => new { t.Date.Year, t.Date.Month })
+                .Select(g => new
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                    Income = g.Where(x => x.Type == "Income").Sum(x => x.Amount),
+                    Expense = g.Where(x => x.Type == "Expense").Sum(x => x.Amount)
+                })
+                .OrderBy(g => g.Month)
+                .ToList();
+
+            var categoryBreakdown = transactions
+                .Where(t => t.Type == "Expense")
+                .GroupBy(t => t.Description)
+                .Select(g => new
+                {
+                    Category = g.Key,
+                    Amount = g.Sum(x => x.Amount)
+                })
+                .OrderByDescending(g => g.Amount)
+                .ToList();
+
+            ViewBag.Last6Months = last6Months;
+            ViewBag.CategoryBreakdown = categoryBreakdown;
+
+            return View();
+        }
+
+
 
     }
 }
