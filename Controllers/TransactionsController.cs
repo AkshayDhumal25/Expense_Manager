@@ -186,7 +186,10 @@ namespace Expense_Manager.Controllers
                             header.Cell().Text("Description").Bold();
                         });
 
-                        ng());
+                        
+                        foreach (var t in list)
+                        {
+                            table.Cell().Text(t.Date.ToShortDateString());
                             table.Cell().Text(t.Type);
                             table.Cell().Text(t.Amount.ToString("C"));
                             table.Cell().Text(t.Description);
