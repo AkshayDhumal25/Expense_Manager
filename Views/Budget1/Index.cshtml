@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Budget>
+
+<h2 class="text-2xl font-bold mb-4">Monthly Budget</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Category</th>
+            <th>Planned</th>
+            <th>Spent</th>
+            <th>Remaining</th>
+            <th>Progress</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var budget in Model)
+        {
+            var spent = ViewBag.SpentAmounts != null && ViewBag.SpentAmounts.ContainsKey(budget.Category)
+            ? ViewBag.SpentAmounts[budget.Category]
+            : 0;
+
+            var remaining = budget.PlannedAmount - spent;
+            var percent = budget.PlannedAmount > 0 ? (spent / budget.PlannedAmount) * 100 : 0;
+
+            <tr>
+                <td>@budget.Category</td>
+                <td>@budget.PlannedAmount</td>
+                <td>@spent</td>
+                <td>@remaining</td>
+                <td>
+                    <div class="progress">
+                        <div class="progress-bar" style="width:@percent%">
+                            @percent.ToString("0")%
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary mt-3">Set New Budget</a>

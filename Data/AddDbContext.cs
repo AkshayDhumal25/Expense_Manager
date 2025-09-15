@@ -1,4 +1,5 @@
 ﻿using System.Transactions;
+using Expense_Manager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Expense_Manager.Data
@@ -12,6 +13,7 @@ namespace Expense_Manager.Data
 
         public DbSet<Expense_Manager.Models.Transaction> Transactions { get; set; }
 
+        public DbSet<Budget> Budgets { get; set; } 
 
     }
 }

@@ -1,0 +1,23 @@
+﻿@model Budget
+
+<h2 class="text-2xl font-bold mb-4">Set Monthly Budget</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label>Category</label>
+        <input type="text" asp-for="Category" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Planned Amount</label>
+        <input type="number" asp-for="PlannedAmount" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Month</label>
+        <input type="number" asp-for="Month" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label>Year</label>
+        <input type="number" asp-for="Year" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
