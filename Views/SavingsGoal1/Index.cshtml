@@ -1,0 +1,44 @@
+﻿@model IEnumerable<Expense_Manager.Models.SavingsGoal>
+
+<h2 class="text-2xl font-bold mb-4">Savings Goals</h2>
+<a asp-action="Create" class="btn btn-primary mb-3">+ Add New Goal</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Goal</th>
+            <th>Target</th>
+            <th>Saved</th>
+            <th>Progress</th>
+            <th>Target Date</th>
+            <th>Action</th>
+        </tr>1
+    </thead>
+    <tbody>
+        @foreach (var goal in Model)
+        {
+            var progress = (goal.SavedAmount / goal.TargetAmount) * 100;
+            <tr>
+                <td>@goal.GoalName</td>
+                <td>₹@goal.TargetAmount</td>
+                <td>₹@goal.SavedAmount</td>
+                <td>
+                    <div class="progress" style="width: 200px;">
+                        <div class="progress-bar bg-success"
+                             style="width:@progress%">
+                            @progress.ToString("0")%
+                        </div>
+                    </div>
+                </td>
+                <td>@goal.TargetDate.ToShortDateString()</td>
+                <td>
+                    <form asp-action="AddProgress" method="post" class="d-flex">
+                        <input type="hidden" name="id" value="@goal.Id" />
+                        <input type="number" name="amount" class="form-control" placeholder="₹ Add" required />
+                        <button type="submit" class="btn btn-sm btn-success ms-2">Update</button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

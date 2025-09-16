@@ -13,7 +13,10 @@ namespace Expense_Manager.Data
 
         public DbSet<Expense_Manager.Models.Transaction> Transactions { get; set; }
 
-        public DbSet<Budget> Budgets { get; set; } 
+        public DbSet<Budget> Budgets { get; set; }
+
+        public DbSet<SavingsGoal> SavingsGoals { get; set; }
+
 
     }
 }
